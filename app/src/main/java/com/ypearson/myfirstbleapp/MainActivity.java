@@ -6,15 +6,25 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.DataSetObserver;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.jar.Manifest;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,10 +32,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RESULT = 0;
-
+    private static final int REQUEST_ENABLE_BT = 0;
 
     private Button button;
-    private static final int REQUEST_ENABLE_BT = 0;
+    private ListView listView;
+    //private LeDeviceListAdapter
     private BluetoothAdapter mBluetoothAdapter;
 
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
@@ -56,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
         }
+
+        String[] names = {"fred", "bob", "john"};
+        listView = (ListView)findViewById(R.id.listView);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.rowlayout, names);
+        listView.setAdapter(new LeDeviceListAdapter(this,names));
+
 
 
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
@@ -88,4 +105,60 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+}
+
+class LeDeviceListAdapter extends BaseAdapter {
+
+    //private ArrayList<BluetoothDevice> mLeDevices;
+    private ArrayList<String> mLeDevices;
+    private LayoutInflater mInflator;
+    private Context context;
+    private TextView tv;
+
+    public LeDeviceListAdapter(Context context, String[] list) {
+        super();
+        //mLeDevices = new ArrayList<BluetoothDevice>();
+        mLeDevices = new ArrayList<S>()
+        mInflator = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    public void addDevice(BluetoothDevice device) {
+        if(!mLeDevices.contains(device)) {
+            //mLeDevices.add(device);
+        }
+    }
+
+    public BluetoothDevice getDevice(int position) {
+        return null;//mLeDevices.get(position);
+    }
+
+    public void clear() {
+        mLeDevices.clear();
+    }
+
+    @Override
+    public int getCount() {
+        return mLeDevices.size();
+    }
+
+    @Override
+    public Object getItem(int i) {
+        return mLeDevices.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+
+
+        View viewRow = mInflator.inflate(R.layout.rowlayout, viewGroup, false);
+        tv = (TextView)viewRow.findViewById(R.id.deviceName);
+        tv.setText(mLeDevices.get(i));//.getName());
+
+        return view;
+    }
 }
