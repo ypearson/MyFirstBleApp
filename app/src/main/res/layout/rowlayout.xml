@@ -4,7 +4,7 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:src="@drawable/ic_launcher"
+        android:src="@drawable/ble"
         android:layout_width="320px"
         android:layout_height="100px"
         android:id="@+id/imageView"

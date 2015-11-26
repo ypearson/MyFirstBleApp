@@ -99,7 +99,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void startLeScan(boolean enable){
 
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
+        if(enable) {
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        } else {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
 
     }
 
