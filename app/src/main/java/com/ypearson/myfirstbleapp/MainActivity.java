@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,16 +20,16 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class    MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RESULT = 0;
     private static final int REQUEST_ENABLE_BT = 0;
+
+    private Handler handler;
 
     private Button button;
     private ListView listView;
@@ -70,18 +71,15 @@ public class MainActivity extends AppCompatActivity {
         mLeDeviceListAdapter = new LeDeviceListAdapter(this,null);
         listView.setAdapter(mLeDeviceListAdapter);
 
-
-
         mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
             @Override
             public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
 
                 Log.d(TAG, "device.getName() = "  + device.getName());
-                Log.d(TAG, "device.getAddress() = " + device.getAddress());
+//                Log.d(TAG, "device.getAddress() = " + device.getAddress());
 
                 mLeDeviceListAdapter.addDevice(device);
                 mLeDeviceListAdapter.notifyDataSetChanged();
-
             }
         };
 
@@ -90,8 +88,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                mBluetoothAdapter.startLeScan(mLeScanCallback);
+                button.setEnabled(false);
+                button.setText("Scanning...");
+                Runnable rs = new Runnable() {
+                    @Override
+                    public void run() {
+                        startLeScan(true);
+                    }
+                };
 
+                Runnable rp = new Runnable() {
+                    @Override
+                    public void run() {
+                        startLeScan(false);
+                    }
+                };
+
+                //mBluetoothAdapter.startLeScan(mLeScanCallback);
+                handler = new Handler();
+                handler.post(rs);
+                handler.postDelayed(rp, 10000);
             }
         });
 
@@ -101,8 +117,14 @@ public class MainActivity extends AppCompatActivity {
 
         if(enable) {
             mBluetoothAdapter.startLeScan(mLeScanCallback);
+            Log.d(TAG, "BLE scan started.");
         } else {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            Log.d(TAG, "BLE scan stopped.");
+
+            button.setEnabled(true); //TODO: move to better location
+            button.setText("Scan");
+
         }
 
     }
@@ -129,15 +151,18 @@ class LeDeviceListAdapter extends BaseAdapter {
     }
 
     public BluetoothDevice getDevice(int position) {
+
         return mLeDevices.get(position);
     }
 
     public void clear() {
+
         mLeDevices.clear();
     }
 
     @Override
     public int getCount() {
+
         return mLeDevices.size();
     }
 
@@ -148,6 +173,7 @@ class LeDeviceListAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
+
         return i;
     }
 
@@ -156,8 +182,9 @@ class LeDeviceListAdapter extends BaseAdapter {
 
         View viewRow = mInflator.inflate(R.layout.rowlayout, viewGroup, false);
         TextView tv = (TextView)viewRow.findViewById(R.id.deviceName);
-        tv.setText(mLeDevices.get(i).getName() + " " + mLeDevices.get(i).getAddress());
-
+        tv.setText(mLeDevices.get(i).getName());
+        tv = (TextView)viewRow.findViewById(R.id.macAddress);
+        tv.setText(mLeDevices.get(i).getAddress());
         return viewRow;
     }
 }

@@ -5,16 +5,29 @@
 
     <ImageView
         android:src="@drawable/ble"
-        android:layout_width="320px"
-        android:layout_height="100px"
+        android:layout_width="280px"
+        android:layout_height="150px"
         android:id="@+id/imageView"
-        android:paddingLeft="50dp"/>
+        android:paddingLeft="0dp"/>
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="100px"
-        android:text="Device Name"
-        android:gravity="center"
-        android:id="@+id/deviceName" />
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="70px"
+            android:text="Device Name"
+            android:gravity="center"
+            android:id="@+id/deviceName" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="70px"
+            android:text="Mac Address"
+            android:gravity="center"
+            android:id="@+id/macAddress" />
+    </LinearLayout>
 
 </LinearLayout>
