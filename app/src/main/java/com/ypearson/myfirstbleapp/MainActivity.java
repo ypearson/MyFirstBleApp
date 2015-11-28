@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
@@ -15,12 +16,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
@@ -155,6 +158,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     class BleStateReceiver extends BroadcastReceiver {
 
         private final String TAG = BleStateReceiver.class.getSimpleName();
@@ -184,6 +202,8 @@ public class MainActivity extends AppCompatActivity {
 
                 case BluetoothAdapter.STATE_CONNECTED:
                     Log.d(TAG, "STATE_CONNECTED");
+                    break;
+                default:
                     break;
             }
         }
