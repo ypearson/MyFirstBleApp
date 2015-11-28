@@ -25,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements IBleState {
+public class MainActivity extends AppCompatActivity {
 
     // Constants
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -45,11 +45,15 @@ public class MainActivity extends AppCompatActivity implements IBleState {
     // State variable
     private int bleState;
 
+    // Broadcast receivers
+    private BleStateReceiver bleStateReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //registerReceiver(new BleStateReceiver(), new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED));
+        bleStateReceiver = new BleStateReceiver();
+        registerReceiver(bleStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 
         setContentView(R.layout.activity_main);
 
@@ -151,19 +155,38 @@ public class MainActivity extends AppCompatActivity implements IBleState {
         }
     }
 
-    @Override
-    public int bleGetState() {
-        return 0;
-    }
+    class BleStateReceiver extends BroadcastReceiver {
 
-    @Override
-    public void bleSetState(int state) {
+        private final String TAG = BleStateReceiver.class.getSimpleName();
 
-    }
+        @Override
+        public void onReceive(Context context, Intent intent) {
 
-    @Override
-    public void bleUpdateUI() {
+            int state = intent.getExtras().getInt("android.bluetooth.adapter.extra.STATE");
 
+            switch (state) {
+
+                case BluetoothAdapter.STATE_ON:
+                    Log.d(TAG, "STATE_ON");
+                    break;
+
+                case BluetoothAdapter.STATE_OFF:
+                    Log.d(TAG, "STATE_OFF");
+
+                    break;
+                case BluetoothAdapter.STATE_TURNING_ON:
+                    Log.d(TAG, "STATE_TURNING_ON");
+                    break;
+
+                case BluetoothAdapter.STATE_TURNING_OFF:
+                    Log.d(TAG, "STATE_TURNING_OFF");
+                    break;
+
+                case BluetoothAdapter.STATE_CONNECTED:
+                    Log.d(TAG, "STATE_CONNECTED");
+                    break;
+            }
+        }
     }
 }
 

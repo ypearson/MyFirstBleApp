@@ -15,13 +15,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
 
-        <receiver
-            android:name=".BleStateReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED"></action>
-            </intent-filter>
-        </receiver>
+        <!--<receiver-->
+            <!--android:name=".BleStateReceiver"-->
+            <!--android:enabled="true">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.bluetooth.adapter.action.STATE_CHANGED"></action>-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <activity android:name=".MainActivity" >
             <intent-filter>
