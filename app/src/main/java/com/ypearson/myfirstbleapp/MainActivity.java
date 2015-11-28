@@ -3,9 +3,12 @@ package com.ypearson.myfirstbleapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,25 +25,32 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 
-public class    MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IBleState {
 
+    // Constants
     private static final String TAG = MainActivity.class.getSimpleName();
-
     private static final int RESULT = 0;
-    private static final int REQUEST_ENABLE_BT = 0;
+    private static final int REQUEST_CODE_ENABLE_BLE = 0;
 
+    // UI Objects
     private Handler handler;
-
     private Button button;
     private ListView listView;
+
+    // Bluetooth objects
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
-
     private BluetoothAdapter.LeScanCallback mLeScanCallback;
+
+    // State variable
+    private int bleState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //registerReceiver(new BleStateReceiver(), new IntentFilter(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED));
+
         setContentView(R.layout.activity_main);
 
         if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
@@ -51,9 +61,11 @@ public class    MainActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.ble_supported, Toast.LENGTH_SHORT).show();
         }
 
-        // This is needed for Marshmallow
-        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, RESULT);
+        // Required for Marshmallow
+        if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, RESULT);
+            }
         }
 
         final BluetoothManager mBluetoothManager = (BluetoothManager)getSystemService(Context.BLUETOOTH_SERVICE);
@@ -61,13 +73,10 @@ public class    MainActivity extends AppCompatActivity {
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if(mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-
+            startActivityForResult(enableBtIntent, REQUEST_CODE_ENABLE_BLE);
         }
 
-        //String[] names = {"fred", "bob", "john"};
         listView = (ListView)findViewById(R.id.listView);
-        //ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.rowlayout, names);
         mLeDeviceListAdapter = new LeDeviceListAdapter(this,null);
         listView.setAdapter(mLeDeviceListAdapter);
 
@@ -75,9 +84,8 @@ public class    MainActivity extends AppCompatActivity {
             @Override
             public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
 
-                Log.d(TAG, "device.getName() = "  + device.getName());
+//                Log.d(TAG, "device.getName() = "  + device.getName());
 //                Log.d(TAG, "device.getAddress() = " + device.getAddress());
-
                 mLeDeviceListAdapter.addDevice(device);
                 mLeDeviceListAdapter.notifyDataSetChanged();
             }
@@ -96,7 +104,6 @@ public class    MainActivity extends AppCompatActivity {
                         startLeScan(true);
                     }
                 };
-
                 Runnable rp = new Runnable() {
                     @Override
                     public void run() {
@@ -104,7 +111,6 @@ public class    MainActivity extends AppCompatActivity {
                     }
                 };
 
-                //mBluetoothAdapter.startLeScan(mLeScanCallback);
                 handler = new Handler();
                 handler.post(rs);
                 handler.postDelayed(rp, 10000);
@@ -124,67 +130,40 @@ public class    MainActivity extends AppCompatActivity {
 
             button.setEnabled(true); //TODO: move to better location
             button.setText("Scan");
-
-        }
-
-    }
-
-
-
-}
-
-class LeDeviceListAdapter extends BaseAdapter {
-
-    private ArrayList<BluetoothDevice> mLeDevices;
-    private LayoutInflater mInflator;
-
-    public LeDeviceListAdapter(Context context, String[] list) {
-        super();
-        mLeDevices = new ArrayList<BluetoothDevice>();
-        mInflator = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
-
-    public void addDevice(BluetoothDevice device) {
-        if(!mLeDevices.contains(device)) {
-            mLeDevices.add(device);
         }
     }
 
-    public BluetoothDevice getDevice(int position) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        return mLeDevices.get(position);
-    }
+        if( requestCode == REQUEST_CODE_ENABLE_BLE) {
 
-    public void clear() {
-
-        mLeDevices.clear();
+            if(resultCode == RESULT_OK) {
+                Log.d(TAG, "RESULT_OK");
+            }
+            else if(resultCode == RESULT_CANCELED) {
+                Log.d(TAG, "RESULT_CANCELED");
+            }
+            else {
+                Log.d(TAG, "RESULT ERROR");
+            }
+        }
     }
 
     @Override
-    public int getCount() {
-
-        return mLeDevices.size();
+    public int bleGetState() {
+        return 0;
     }
 
     @Override
-    public Object getItem(int i) {
-        return mLeDevices.get(i);
+    public void bleSetState(int state) {
+
     }
 
     @Override
-    public long getItemId(int i) {
+    public void bleUpdateUI() {
 
-        return i;
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-
-        View viewRow = mInflator.inflate(R.layout.rowlayout, viewGroup, false);
-        TextView tv = (TextView)viewRow.findViewById(R.id.deviceName);
-        tv.setText(mLeDevices.get(i).getName());
-        tv = (TextView)viewRow.findViewById(R.id.macAddress);
-        tv.setText(mLeDevices.get(i).getAddress());
-        return viewRow;
     }
 }
+
